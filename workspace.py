@@ -5,17 +5,18 @@ from tkinter import ttk, Canvas, NW
 import os
 from configspace import Configspace
 from utils import  isPixelWhite
+from utils import  isPixelBlack
 
 
 class Workspace:
     def __init__(self, robotImagePath, envImagePath, root):
         
         self.root = root
-        self.envImage = Image.open(envImagePath)
+        self.envImage = Image.open(envImagePath).convert('1')
         self.envArray = np.array(self.envImage)
         self.envPhoto = ImageTk.PhotoImage(self.envImage)
 
-        self.robotImage = Image.open(robotImagePath)
+        self.robotImage = Image.open(robotImagePath).convert('1')
         self.robotArray = np.array(self.robotImage)
         self.robotPhoto = ImageTk.PhotoImage(self.robotImage)
 
@@ -34,10 +35,7 @@ class Workspace:
         self.label.configure(image=self.photoToDraw)
         self.label.image = self.photoToDraw
         self.label.pack(side = "bottom", fill = "both", expand = "yes")
-   
+
+    # Checks if robot is in collision
     def isInCollision(self,x,y):
-        return False
-
-
-        
-    
+        return not self.envArray[y][x]

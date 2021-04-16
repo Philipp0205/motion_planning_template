@@ -1,12 +1,9 @@
-import tkinter 
+import tkinter
 from tkinter import ttk, RIGHT, Canvas, BOTH, Scale, HORIZONTAL
-from workspace import Workspace 
+from workspace import Workspace
 from configspace import Configspace
 from controller import  Controller
-from PIL import ImageTk, Image
-import os
 from utils import setBackgroundColor
-
 
 def demo():
     root = tkinter.Tk()
@@ -20,17 +17,19 @@ def demo():
     nb.add(page1, text='Workspace')
     nb.add(page2, text='Configspace')
     nb.grid(column=0)
- 
+
     workspace = Workspace("./resources/robot_BW_small.bmp", "./resources/Room_BW_small.bmp", page1)
     configspace = Configspace(page2)
     controller = Controller(workspace,configspace)
 
-
     workspace.drawAll(workspace.currentPos[0],workspace.currentPos[1])
     def callback(event):
-        # print ("clicked at", event.x, event.y)
+        print ("clicked at", event.x, event.y)
+
         controller.drawMouseOffSet(event.x, event.y)
+        print(workspace.isInCollision(event.x, event.y))
         if controller.isInCollision(): setBackgroundColor(page1,"red")
+        # if workspace.isInCollision(): setBackgroundColor(page1,"red")
         else: setBackgroundColor(page1,"green")
 
     workspace.label.bind("<Button-1>", callback)
@@ -39,12 +38,13 @@ def demo():
         if controller.isAllInitialized():
             controller.setSolutionPathOnCurrentPos(int(val))
             controller.drawCurrentPos()
+            print(workspace.currentPos)
             if controller.isInCollision(): setBackgroundColor(page1,"red")
             else: setBackgroundColor(page1,"green")
 
     slider = Scale(page1, from_=0, to=200, orient=HORIZONTAL, command=moveRobotOnPath)
     slider.config(length=600)
-    
+
     def set_goal():
         controller.setCurrentPosAsGoal()
         slider['from_'] = 0

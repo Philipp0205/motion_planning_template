@@ -12,3 +12,6 @@ def isPixelWhite(pixel):
             if pixel[2]==255:
                 return True
     return False
+
+def isPixelBlack(r, g, b):
+    return True if 0 in (r, g ,b) else False
