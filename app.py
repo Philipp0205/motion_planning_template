@@ -23,13 +23,11 @@ def demo():
     controller = Controller(workspace,configspace)
 
     workspace.drawAll(workspace.currentPos[0],workspace.currentPos[1])
-    def callback(event):
-        print ("clicked at", event.x, event.y)
+    # workspace.drawWorkspace(workspace.currentPos[0], workspace.currentPos[1])
 
+    def callback(event):
         controller.drawMouseOffSet(event.x, event.y)
-        print(workspace.isInCollision(event.x, event.y))
-        if controller.isInCollision(): setBackgroundColor(page1,"red")
-        # if workspace.isInCollision(): setBackgroundColor(page1,"red")
+        if controller.isInCollision(event.x, event.y): setBackgroundColor(page1,"red")
         else: setBackgroundColor(page1,"green")
 
     workspace.label.bind("<Button-1>", callback)
@@ -61,7 +59,6 @@ def demo():
     slider.pack()
 
     root.mainloop()
-
 
 if __name__ == "__main__":
     demo()
