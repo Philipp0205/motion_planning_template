@@ -32,7 +32,7 @@ class Controller:
 
     def isInCollision(self, x=None,y=None):
         if x is None: x= self.workspace.currentPos[0]
-        if y is None: y= self.workspace.currentPos[2]
+        if y is None: y= self.workspace.currentPos[1]
 
         return self.workspace.isInCollision(x,y)
 
