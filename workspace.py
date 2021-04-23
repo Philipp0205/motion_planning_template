@@ -11,11 +11,11 @@ class Workspace:
     def __init__(self, robotImagePath, envImagePath, root):
 
         self.root = root
-        self.envImage = Image.open(envImagePath).resize((1080, 700)).convert('1')
+        self.envImage = Image.open(envImagePath).convert('1')
         self.envArray = np.array(self.envImage)
         self.envPhoto = ImageTk.PhotoImage(self.envImage)
 
-        self.robotImage = Image.open(robotImagePath).resize((34, 34)).convert('1')
+        self.robotImage = Image.open(robotImagePath).convert('1')
         self.robotArray = np.array(self.robotImage)
         self.robotPhoto = ImageTk.PhotoImage(self.robotImage)
 
@@ -36,9 +36,10 @@ class Workspace:
         self.label.pack(side="bottom", fill="both", expand="yes")
 
     def isInCollision(self, x, y):
-        # return not self.envArray[y][x]
-        for i in range(x, x+int(self.robotImage.size[0])):
-            for j in range(y, y+int(self.robotImage.size[1])):
+        xEdges = x - int(self.robotImage.size[0]/2), x + int(self.robotImage.size[0]/2)
+        yEdges = y- int(self.robotImage.size[0]/2),y + int(self.robotImage.size[1]/2)
+        for i in range(xEdges[0], xEdges[1]):
+            for j in range(yEdges[0], yEdges[1]):
                 if not self.envArray[j, i]:
                     return True
         return False

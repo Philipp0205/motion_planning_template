@@ -27,6 +27,7 @@ def demo():
 
     def callback(event):
         controller.drawMouseOffSet(event.x, event.y)
+        print("Mouse clicked: " + str(event.x), str(event.y))
         if controller.isInCollision(event.x, event.y): setBackgroundColor(page1,"red")
         else: setBackgroundColor(page1,"green")
 
