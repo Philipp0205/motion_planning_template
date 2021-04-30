@@ -9,7 +9,6 @@ from utils import isPixelWhite
 
 class Workspace:
     def __init__(self, robotImagePath, envImagePath, root):
-
         self.root = root
         self.envImage = Image.open(envImagePath).convert('1')
         self.envArray = np.array(self.envImage)
@@ -35,11 +34,24 @@ class Workspace:
         self.label.image = self.photoToDraw
         self.label.pack(side="bottom", fill="both", expand="yes")
 
-    def isInCollision(self, x, y):
-        xEdges = x - int(self.robotImage.size[0]/2), x + int(self.robotImage.size[0]/2)
-        yEdges = y- int(self.robotImage.size[0]/2),y + int(self.robotImage.size[1]/2)
-        for i in range(xEdges[0], xEdges[1]):
-            for j in range(yEdges[0], yEdges[1]):
+    def isRobotInCollision(self, x, y):
+        difference = int(self.robotImage.size[0]/2)
+        # width of robot
+        x_edges = x - difference, x + difference
+        # heigh of robot
+        y_edges = y - difference, y + difference
+
+        # deltet that
+        if y_edges[1] > 980:
+            y_edges = y_edges[0], 979
+        elif x_edges[1] > 1350:
+            x_edges = x_edges[0], 1349
+
+        for i in range(x_edges[0], x_edges[1]):
+            for j in range(y_edges[0], y_edges[1]):
                 if not self.envArray[j, i]:
                     return True
         return False
+
+    def isInCollision(self, x, y):
+        return self.envArray[y, x]
