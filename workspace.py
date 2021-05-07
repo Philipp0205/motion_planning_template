@@ -1,95 +1,57 @@
 import numpy as np
-from PIL import Image, ImageTk, ImageColor, ImageDraw
+from PIL import Image, ImageTk, ImageColor
 from io import BytesIO
 from tkinter import ttk, Canvas, NW
 import os
-
-from PIL.ImageEnhance import Color
-
 from configspace import Configspace
-from utils import  isPixelWhite
-from utils import  isPixelBlack
+from utils import isPixelWhite
 
 
 class Workspace:
     def __init__(self, robotImagePath, envImagePath, root):
-        
         self.root = root
         self.envImage = Image.open(envImagePath).convert('1')
         self.envArray = np.array(self.envImage)
         self.envPhoto = ImageTk.PhotoImage(self.envImage)
 
-        self.envImageDebug= Image.open(envImagePath)
-        self.envPhotoDebug= ImageTk.PhotoImage(self.envImageDebug)
-
         self.robotImage = Image.open(robotImagePath).convert('1')
         self.robotArray = np.array(self.robotImage)
         self.robotPhoto = ImageTk.PhotoImage(self.robotImage)
 
-        # self.label = ttk.Label(root, image = self.envPhoto)
-        self.label = ttk.Label(root, image = self.envPhotoDebug)
+        self.label = ttk.Label(root, image=self.envPhoto)
 
-        self.currentPos = (0,0)
-        self.robotEdges = (0,0), (0,24), (24,24), (24,0)
+        self.currentPos = (0, 0)
         self.isInitialize = False
 
-    def drawAll (self,xCurrent,yCurrent,xInit=-1,yInit=-1,xGoal=-1,yGoal=-1):
-        self.currentPos=xCurrent,yCurrent
-        self.imageToDraw = self.envImageDebug.copy()
-        if xInit>-1: self.imageToDraw.paste(self.robotImage.copy(),(xInit,yInit))
-        if xGoal>-1: self.imageToDraw.paste(self.robotImage.copy(),(xGoal,yGoal))
-
-        self.imageToDraw.paste(self.robotImage.copy(),(self.currentPos[0],self.currentPos[1]))
-        self.photoToDraw = ImageTk.PhotoImage(self.imageToDraw)
-        self.label.configure(image=self.photoToDraw)
-        self.label.image = self.photoToDraw
-
-        self.label.pack(side = "bottom", fill = "both", expand = "yes")
-
-    def drawWorkspace(self, xCurrent, yCurrent):
-        self.currentPos=xCurrent, yCurrent
+    def drawAll(self, xCurrent, yCurrent, xInit=-1, yInit=-1, xGoal=-1, yGoal=-1):
+        self.currentPos = xCurrent, yCurrent
         self.imageToDraw = self.envImage.copy()
-        self.photoToDraw = ImageTk.PhotoImage(self.imageToDraw)
-
-        self.label.configure(image=self.photoToDraw)
-        self.label.image = self.photoToDraw
-
-        self.label.pack(side = "bottom", fill = "both", expand = "yes")
-
-    def drawRobots(self, xInit, yInit, xGoal, yGoal):
-        self.imageToDraw.paste(self.robotImage.copy(),(self.currentPos[0],self.currentPos[1]))
-        self.photoToDraw = ImageTk.PhotoImage(self.imageToDraw)
-        self.drawWorkspace(self.currentPos[0], self.currentPos[1])
-
         if xInit > -1: self.imageToDraw.paste(self.robotImage.copy(), (xInit, yInit))
         if xGoal > -1: self.imageToDraw.paste(self.robotImage.copy(), (xGoal, yGoal))
-
         self.imageToDraw.paste(self.robotImage.copy(), (self.currentPos[0], self.currentPos[1]))
-
-    def reDrawEnviromentForDebugging(self):
-        #self.label = ttk.Label(self.root, image = self.envPhotoDebug)
-        self.label.image = None
-
+        self.photoToDraw = ImageTk.PhotoImage(self.imageToDraw)
         self.label.configure(image=self.photoToDraw)
         self.label.image = self.photoToDraw
-
         self.label.pack(side="bottom", fill="both", expand="yes")
 
-        draw = ImageDraw.Draw(self.envImageDebug)
+    def isRobotInCollision(self, x, y):
+        difference = int(self.robotImage.size[0]/2)
+        # width of robot
+        x_edges = x - difference, x + difference
+        # heigh of robot
+        y_edges = y - difference, y + difference
 
-    def calculateRobotEdgesFromCurrentPosition(self,x,y):
-        robotEdges = (x+24,y), (x, y+24), (x-24,y), (x,y-24)
-        return robotEdges;
+        # deltet that
+        if y_edges[1] > 980:
+            y_edges = y_edges[0], 979
+        elif x_edges[1] > 1350:
+            x_edges = x_edges[0], 1349
 
-
-    # Checks if robot is in collision
-    def isInCollision(self,x,y):
-        self.reDrawEnviromentForDebugging()
-        draw = ImageDraw.Draw(self.envImageDebug)
-        edges = self.calculateRobotEdgesFromCurrentPosition(x,y)
-
-        for edge in self.calculateRobotEdgesFromCurrentPosition(x,y):
-            # true = in colisison
-            if not self.envArray[edge[1], edge[0]]:
-                return True
+        for i in range(x_edges[0], x_edges[1]):
+            for j in range(y_edges[0], y_edges[1]):
+                if not self.envArray[j, i]:
+                    return True
         return False
+
+    def isInCollision(self, x, y):
+        return self.envArray[y, x]

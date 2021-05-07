@@ -2,6 +2,7 @@ import tkinter
 from tkinter import ttk, RIGHT, Canvas, BOTH, Scale, HORIZONTAL
 from workspace import Workspace
 from configspace import Configspace
+from sprm import SPRM
 from controller import  Controller
 from utils import setBackgroundColor
 
@@ -23,10 +24,14 @@ def demo():
     controller = Controller(workspace,configspace)
 
     workspace.drawAll(workspace.currentPos[0],workspace.currentPos[1])
-    # workspace.drawWorkspace(workspace.currentPos[0], workspace.currentPos[1])
+
+    # debugging
+    sprm = SPRM(configspace, workspace)
+
 
     def callback(event):
         controller.drawMouseOffSet(event.x, event.y)
+        print("Mouse clicked: " + str(event.x), str(event.y))
         if controller.isInCollision(event.x, event.y): setBackgroundColor(page1,"red")
         else: setBackgroundColor(page1,"green")
 
