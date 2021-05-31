@@ -5,6 +5,9 @@ class Configspace:
     def off(self,x):
       return x+self.theOffset
 
+    def offUp(self, y):
+        return y+35
+
     def __init__(self,root):
         self.initConfig = -1, -1
         self.goalConfig = -1, -1
@@ -47,7 +50,19 @@ class Configspace:
       for i in range(1,len(self.solutionPath)):
         c1 = self.solutionPath[i-1]
         c2 = self.solutionPath[i]
-        self.canvas.create_line(self.off(c1[0]),self.off(c1[1]),self.off(c2[0]),self.off(c2[1]),fill='purple1')
+        # self.canvas.create_line(self.off(c1[0]),self.off(c1[1]),self.off(c2[0]),self.off(c2[1]),fill='purple1')
+
+    # Debugging
+    def draw_line(self, pointA, pointB, color, width = 1 ):
+        self.canvas.create_line(self.off(pointA[0]),
+                                self.off(pointA[1]),
+                                self.off(pointB[0]),
+                                self.off(pointB[1]),
+                                fill=color,
+                                width=width)
+
+    def draw_text(self, point, text):
+        self.canvas.create_text(self.offUp(point[0]), self.offUp(point[1]), text=text, fill="black", font=('Helvetica 10 bold'))
 
 
     def setIntialSolutionPath(self):

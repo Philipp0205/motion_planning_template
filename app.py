@@ -2,6 +2,7 @@ import tkinter
 from tkinter import ttk, RIGHT, Canvas, BOTH, Scale, HORIZONTAL
 from workspace import Workspace
 from configspace import Configspace
+from sprm import SPRM
 from controller import  Controller
 from utils import setBackgroundColor
 
@@ -23,10 +24,10 @@ def demo():
     controller = Controller(workspace,configspace)
 
     workspace.drawAll(workspace.currentPos[0],workspace.currentPos[1])
-    # workspace.drawWorkspace(workspace.currentPos[0], workspace.currentPos[1])
 
     def callback(event):
         controller.drawMouseOffSet(event.x, event.y)
+        print("Mouse clicked: " + str(event.x), str(event.y))
         if controller.isInCollision(event.x, event.y): setBackgroundColor(page1,"red")
         else: setBackgroundColor(page1,"green")
 
@@ -54,6 +55,13 @@ def demo():
     def set_init():
         controller.setCurrentPosAsInit()
     setInitButton = ttk.Button(page1, text = 'Set Init',command = set_init)
+    setInitButton.pack(side=tkinter.RIGHT)
+
+    def start_sPRM():
+        sprm = SPRM(configspace, workspace)
+
+    # Debugging
+    setInitButton = ttk.Button(page1, text = 'sPRM',command = start_sPRM)
     setInitButton.pack(side=tkinter.RIGHT)
 
     slider.pack()
