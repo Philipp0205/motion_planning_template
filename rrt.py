@@ -59,8 +59,6 @@ class RRT:
         # 3. Maybe instead of taking samples along the circumference of range_max, can use gaussian sampling
 
         self.vertex.append(self.goal_pt)
-        print(self.vertex)
-        print(self.init_pt, self.goal_pt)
         print("RRT Timeout")
         #self.color_points(self.vertex, "red")
         return self.vertex
