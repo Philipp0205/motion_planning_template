@@ -1,5 +1,9 @@
+import time
 from collections import deque
 import random
+
+import multiprocessing
+from joblib import Parallel, delayed
 
 from dijkstra import Graph, dijkstra, DijkstraSPF
 
@@ -21,13 +25,16 @@ class SPRM:
 
         self.add_start_goal_configurations()
 
-        self.compute_samples(50, 1350, 980)
+        self.compute_samples(3000, 1350, 980)
+
+        self.num_cores = multiprocessing.cpu_count()
 
         samples = self.add_ids_to_samples(self.vertex_no_colission)
 
-        neighbours_lengths = self.compute_nearest_neighbours(samples, 200)
+        neighbours_lengths = self.compute_nearest_neighbours(samples, 100)
 
-        self.draw_free_graph(neighbours_lengths, samples)
+        # This takes a long time
+        # start = time.perf_counter()
 
         for n in neighbours_lengths:
             self.graph.add_edge(n[0], n[1], n[2])
@@ -36,10 +43,16 @@ class SPRM:
         self.draw_path(shortest_path, samples)
 
     def draw_path(self, path, samples):
+        shortest_path_samples = []
         for count in range(len(path)):
-            if count+1 < len(path):
-                print(path[count] + " -> " + path[count+1])
-                self.configspace.draw_line(samples[int(path[count])][1], samples[int(path[count+1])][1], "purple", 5)
+            if count + 1 < len(path):
+                print(path[count] + " -> " + path[count + 1])
+                self.configspace.draw_line(samples[int(path[count])][1], samples[int(path[count + 1])][1], "purple", 5)
+                shortest_path_samples.append(samples[int(path[count])][1])
+            else:
+                shortest_path_samples.append(samples[int(path[count])][1])
+
+        self.configspace.setIntialSolutionPath2(shortest_path_samples)
 
     def add_ids_to_samples(self, samples):
         result = []
@@ -49,7 +62,6 @@ class SPRM:
             i += 1
 
         return result
-
 
     def compute_samples(self, number_of_samples, x_range, y_range):
         x_range -= 1
@@ -102,15 +114,14 @@ class SPRM:
         return (x - center_x) ** 2 + (y - center_y) ** 2
 
     def create_nodes(self, neighbours):
-        nodes = [ ]
+        nodes = []
         i = 0
 
         for n in neighbours:
-            nodes.append([i, i+1, n[0], n[1], n[2]])
+            nodes.append([i, i + 1, n[0], n[1], n[2]])
             i += 2
 
         return nodes
-
 
     def validate_edge(self, sampleA, sampleB, n):
         segment_start = sampleA
@@ -128,14 +139,24 @@ class SPRM:
                 return False
 
     def draw_free_graph(self, neighbours, samples):
+        # Parallel(n_jobs=self.num_cores(delayed(self.draw_sample)(s, samples) for s in neighbours))
+
+        def draw_sample(s, samples):
+            sample1 = samples[int(s[0])]
+            sample2 = samples[int(s[1])]
+            self.configspace.draw_line(sample1[1], sample2[1], "black")
+            self.configspace.draw_text(sample1[1], sample1[0])
+            self.configspace.draw_text(sample2[1], sample2[0])
+
         for s in neighbours:
             sample1 = samples[int(s[0])]
             sample2 = samples[int(s[1])]
             self.configspace.draw_line(sample1[1], sample2[1], "black")
             self.configspace.draw_text(sample1[1], sample1[0])
             self.configspace.draw_text(sample2[1], sample2[0])
-            for sample2 in neighbours:
-                self.validate_edge(sample1, sample2, 10)
+
+            # for sample2 in neighbours:
+            #  self.validate_edge(sample1, sample2, 10)
 
     def compute_shortest_path(self, weighted_graph, start, end):
         graph = tuple(weighted_graph)
@@ -146,5 +167,3 @@ class SPRM:
         print(" -> ".join(dijkstra.get_path(end1)))
 
         return dijkstra.get_path(end1)
-
-

@@ -37,7 +37,7 @@ def demo():
         if controller.isAllInitialized():
             controller.setSolutionPathOnCurrentPos(int(val))
             controller.drawCurrentPos()
-            print(workspace.currentPos)
+
             if controller.isInCollision(): setBackgroundColor(page1,"red")
             else: setBackgroundColor(page1,"green")
 
@@ -46,10 +46,12 @@ def demo():
 
     def set_goal():
         controller.setCurrentPosAsGoal()
+        SPRM(configspace, workspace)
+
         slider['from_'] = 0
         slider['to_'] = len(configspace.solutionPath)-1
 
-    setGoalButton = ttk.Button(page1, text = 'Set Goal',command = set_goal)
+    setGoalButton = ttk.Button(page1, text = 'Set Goal',command=set_goal)
     setGoalButton.pack(side=tkinter.RIGHT)
 
     def set_init():
@@ -70,3 +72,7 @@ def demo():
 
 if __name__ == "__main__":
     demo()
+
+
+def set_slider():
+    return None

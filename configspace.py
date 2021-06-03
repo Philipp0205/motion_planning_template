@@ -12,13 +12,14 @@ class Configspace:
         self.initConfig = -1, -1
         self.goalConfig = -1, -1
         self.solutionPath = []
+        self.sampleSolutionPath = []
         self.isInitialize = False
         self.root = root
         self.xExt = 0
         self.yExt = 0
         self.canvas = Canvas(self.root)
         self.theOffset = 24
-      
+
     def setDimensions(self,x,y):      
       self.xExt=x
       self.yExt=y
@@ -77,5 +78,48 @@ class Configspace:
             newY = self.initConfig[1] + deltaY
             self.solutionPath.append((newX, newY))
         self.solutionPath.append(self.goalConfig)
+
+    def setIntialSolutionPath2(self, samples):
+        self.sampleSolutionPath = samples
+        self.setSolutionPath()
+
+    def setSolutionPath(self):
+        resolution = self.calculate_resolution_of_soluton_path(self.sampleSolutionPath)
+
+        for i in range(len(self.sampleSolutionPath)):
+            if (i < len(self.sampleSolutionPath)-1):
+                sample1 = self.sampleSolutionPath[i]
+                sample2 = self.sampleSolutionPath[i + 1]
+
+                for i in range(0, resolution):
+                    deltaX = round(i * float(sample2[0] - sample1[0]) / float(resolution))
+                    deltaY = round(i * float(sample2[1] - sample1[1]) / float(resolution))
+                    newX = sample1[0] + deltaX
+                    newY = sample1[1] + deltaY
+                    self.solutionPath.append((newX, newY))
+        print("Solution Path")
+        print(self.solutionPath)
+
+    def calculate_resolution_of_soluton_path(self, samples):
+        resolution = 0;
+        for i in range(len(samples)):
+            if (i != len(samples) - 1):
+                sample1 = samples[i]
+                sample2 = samples[i + 1]
+
+                resolution += max(abs(
+                    sample1[0] - sample2[0]), abs(sample2[1] - sample1[1]))
+
+        return resolution;
+
+
+
+
+
+
+
+
+
+
 
 
