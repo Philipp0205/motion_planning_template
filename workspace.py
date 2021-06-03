@@ -11,11 +11,13 @@ class Workspace:
     def __init__(self, robotImagePath, envImagePath, root):
 
         self.root = root
-        self.envImage = Image.open(envImagePath).resize((1080, 700)).convert('1')
+        #self.envImage = Image.open(envImagePath).resize((1080, 700)).convert('1')
+        self.envImage = Image.open(envImagePath).convert('1')
         self.envArray = np.array(self.envImage)
         self.envPhoto = ImageTk.PhotoImage(self.envImage)
 
-        self.robotImage = Image.open(robotImagePath).resize((34, 34)).convert('1')
+        #self.robotImage = Image.open(robotImagePath).resize((34, 34)).convert('1')
+        self.robotImage = Image.open(robotImagePath).convert('1')
         self.robotArray = np.array(self.robotImage)
         self.robotPhoto = ImageTk.PhotoImage(self.robotImage)
 

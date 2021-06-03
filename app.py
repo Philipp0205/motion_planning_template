@@ -67,8 +67,8 @@ def demo():
     
     root.mainloop()
 
-    # debugginggit commit -m "Change to pos[2]"
-    rrt = RRT(configspace, workspace)git commit -m "Change to pos[2]"
+    # debugging
+    rrt = RRT(configspace, workspace)
 
 if __name__ == "__main__":
     demo()
