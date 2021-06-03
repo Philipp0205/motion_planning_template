@@ -13,7 +13,7 @@ class RRT:
         self.goal_pt = []
         self.vertex = []
         self.add_start_goal_configurations()
-        self.range_max = 50
+        self.range_max = 100
         #self.c_near = self.init_pt
         self.rrt_alg(self.init_pt, self.range_max, 5)
 
@@ -21,14 +21,16 @@ class RRT:
     def add_start_goal_configurations(self):
         self.init_pt = self.configspace.initConfig
         self.goal_pt = self.configspace.goalConfig
+        # Adding inital configuration to tree
+        self.vertex.append(self.init_pt)
+        print(self.init_pt, self.goal_pt)
 
     #RRT algorithm implementation
     def rrt_alg(self, c_near, range_max, t_max):
-        #Adding inital configuration to tree
-        self.vertex.append(self.init_pt)
 
         #All configurations within distance rangemax
         self.sample_arr = self.get_x_y_co(c_near, range_max)
+        #print(self.sample_arr)
 
         #Setting the time element based on current time
         t_end = time.time() + t_max
@@ -47,7 +49,7 @@ class RRT:
             #Checking if goal reached before time out
             if (c_near != self.goal_pt):
                 print("neighbour not goal")
-                print(c_near)
+                print(self.vertex)
                 self.rrt_alg(c_near, self.range_max, t_max-1)
             else:
                 print("Neighbour is goal")
@@ -59,6 +61,7 @@ class RRT:
         # 3. Maybe instead of taking samples along the circumference of range_max, can use gaussian sampling
 
         self.vertex.append(self.goal_pt)
+        #print(self.vertex)
         print("RRT Timeout")
         #self.color_points(self.vertex, "red")
         return self.vertex
