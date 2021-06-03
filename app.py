@@ -1,21 +1,22 @@
-import tkinter 
+import tkinter
 from tkinter import ttk, RIGHT, Canvas, BOTH, Scale, HORIZONTAL
 from workspace import Workspace 
 from configspace import Configspace
-from controller import  Controller
+from controller import Controller
 from PIL import ImageTk, Image
 import os
 from utils import setBackgroundColor
+from rrt import RRT
 
 
 def demo():
     root = tkinter.Tk()
     root.title("Motion Planning")
-    universal_height = 1000
+    universal_height = 700
 
     nb = ttk.Notebook(root)
-    page1 = ttk.Frame(nb, width= 1080,height = universal_height)
-    page2 = ttk.Frame(nb,width = 1080,height = universal_height)
+    page1 = ttk.Frame(nb, width=1080, height=universal_height)
+    page2 = ttk.Frame(nb, width=1080, height=universal_height)
 
     nb.add(page1, text='Workspace')
     nb.add(page2, text='Configspace')
@@ -25,11 +26,13 @@ def demo():
     configspace = Configspace(page2)
     controller = Controller(workspace,configspace)
 
-
     workspace.drawAll(workspace.currentPos[0],workspace.currentPos[1])
+
+    
     def callback(event):
-        # print ("clicked at", event.x, event.y)
+        #print ("clicked at", event.x, event.y)
         controller.drawMouseOffSet(event.x, event.y)
+        #print(controller.isInCollision(event.x, event.y))
         if controller.isInCollision(): setBackgroundColor(page1,"red")
         else: setBackgroundColor(page1,"green")
 
@@ -39,12 +42,14 @@ def demo():
         if controller.isAllInitialized():
             controller.setSolutionPathOnCurrentPos(int(val))
             controller.drawCurrentPos()
+            #print(controller.isInCollision())
             if controller.isInCollision(): setBackgroundColor(page1,"red")
             else: setBackgroundColor(page1,"green")
 
     slider = Scale(page1, from_=0, to=200, orient=HORIZONTAL, command=moveRobotOnPath)
     slider.config(length=600)
-    
+
+
     def set_goal():
         controller.setCurrentPosAsGoal()
         slider['from_'] = 0
@@ -57,11 +62,13 @@ def demo():
         controller.setCurrentPosAsInit()
     setInitButton = ttk.Button(page1, text = 'Set Init',command = set_init)
     setInitButton.pack(side=tkinter.RIGHT)
-
+    
     slider.pack()
-
+    
     root.mainloop()
 
+    # debugging
+    rrt = RRT(configspace, workspace)
 
 if __name__ == "__main__":
     demo()

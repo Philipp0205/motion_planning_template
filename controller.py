@@ -29,7 +29,7 @@ class Controller:
     def isInCollision(self, x=None,y=None):
         if x is None: x= self.workspace.currentPos[0]
         if y is None: y= self.workspace.currentPos[1]
-        return self.workspace.isInCollision(x,y)
+        return self.workspace.isRobotInCollision(x,y)
 
     def isAllInitialized(self):
         if self.configspace.isInitialize and self.workspace.isInitialize: return True

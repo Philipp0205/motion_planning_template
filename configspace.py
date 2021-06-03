@@ -39,6 +39,7 @@ class Configspace:
       if self.initConfig[0]>-1: self.drawConfiguration(self.initConfig[0],self.initConfig[1],'green')
       if self.goalConfig[0]>-1: self.drawConfiguration(self.goalConfig[0],self.goalConfig[1],'red')
 
+
     def drawConfiguration(self,x,y,color):
       r =5
       self.canvas.create_oval(self.off(x-r),self.off(y-r),self.off(x+r),self.off(y+r),fill=color)
@@ -62,5 +63,15 @@ class Configspace:
             newY = self.initConfig[1] + deltaY
             self.solutionPath.append((newX, newY))
         self.solutionPath.append(self.goalConfig)
+
+    #debugging
+    def draw_line(self, pointA, pointB, color):
+        self.canvas.create_line(self.off(pointA[0]),
+                                self.off(pointA[1]),
+                                self.off(pointB[0]),
+                                self.off(pointB[1]),
+                                fill=color)
+
+
 
 
