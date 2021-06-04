@@ -1,3 +1,4 @@
+import math
 import time
 from collections import deque
 import random
@@ -25,19 +26,17 @@ class SPRM:
 
         self.add_start_goal_configurations()
 
-        self.compute_samples(3000, 1350, 980)
+        self.compute_samples(200, 1350, 980)
 
         self.num_cores = multiprocessing.cpu_count()
 
         samples = self.add_ids_to_samples(self.vertex_no_colission)
 
-        neighbours_lengths = self.compute_nearest_neighbours(samples, 100)
+        neighbours_lengths = self.compute_nearest_neighbours(samples, 300)
 
         # This takes a long time
         # start = time.perf_counter()
-
-        for n in neighbours_lengths:
-            self.graph.add_edge(n[0], n[1], n[2])
+        self.draw_free_graph(neighbours_lengths, samples)
 
         shortest_path = self.compute_shortest_path(neighbours_lengths, samples[0], samples[1])
         self.draw_path(shortest_path, samples)
@@ -62,6 +61,9 @@ class SPRM:
             i += 1
 
         return result
+
+    def get_samples_from_id(self, samples, id):
+        return samples[int(id)]
 
     def compute_samples(self, number_of_samples, x_range, y_range):
         x_range -= 1
@@ -90,13 +92,14 @@ class SPRM:
             self.configspace.draw_line(point[0], point[1], color)
 
     def compute_nearest_neighbours(self, samples, radius):
-        result = []
+        neighbour_lengths = []
         for center_sample in samples:
             for sample in samples:
                 length = self.compute_length_of_two_points(center_sample[1], sample[1])
                 if length <= radius ** 2:
-                    result.append([center_sample[0], sample[0], length])
-        return result
+                    if self.validate_edge(center_sample, sample, 10):
+                        neighbour_lengths.append([center_sample[0], sample[0], length])
+        return neighbour_lengths
 
     def add_start_goal_configurations(self):
         self.vertex_no_colission.append(self.configspace.initConfig)
@@ -124,19 +127,29 @@ class SPRM:
         return nodes
 
     def validate_edge(self, sampleA, sampleB, n):
-        segment_start = sampleA
-        segment_end = sampleB
+        segment_start = sampleA[1]
+        segment_end = sampleB[1]
 
-        def create_linear_interpolation(n):
-            cx = segment_start[0] + (segment_end[0] - segment_start[0]) / n
-            cy = segment_start[1] + (segment_end[1] - segment_start[1]) / n
+        def create_linear_interpolation(segment_start, n):
+            cx = math.ceil(segment_start[0] + (segment_end[0] - segment_start[0]) / n)
+            cy = math.ceil(segment_start[1] + (segment_end[1] - segment_start[1]) / n)
 
-            if self.workspace.isInCollision(round(cx), round(cy)):
+
+            print("CX: ", segment_start[0], " + ", segment_end[0], " - ", segment_start[0], " / ", n, " = ", cx)
+            print("CY: ", segment_start[1], " + ", segment_end[1], " - ", segment_start[1], " / ", n, " = ", cy)
+
+            if self.workspace.isInCollision(cx, cy):
                 self.configspace.draw_line(segment_start, segment_end, "red")
-                return True
-            elif segment_start[0] == segment_end[0] & segment_start[1] == segment_end[1]:
-                self.configspace.draw_line(segment_start, segment_end, "green")
                 return False
+            else:
+                if segment_start[0] >= segment_end[0] and segment_start[1] >= segment_end[1]:
+                    self.configspace.draw_line(segment_start, segment_end, "black")
+                    return True
+                else:
+                    n -= 1
+                    create_linear_interpolation((cx, cy), n)
+
+        create_linear_interpolation(segment_start, n)
 
     def draw_free_graph(self, neighbours, samples):
         # Parallel(n_jobs=self.num_cores(delayed(self.draw_sample)(s, samples) for s in neighbours))
