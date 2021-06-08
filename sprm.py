@@ -3,6 +3,7 @@ import time
 from collections import deque
 import random
 import itertools
+import networkx as nx
 
 import numpy
 from scipy import interpolate
@@ -28,17 +29,16 @@ class SPRM:
 
         self.add_start_goal_configurations()
 
-        self.compute_samples(300, 1350, 980)
+        self.compute_samples(1000, 1350, 980)
 
         samples = self.add_ids_to_samples(self.vertex_no_colission)
 
-        neighbours_lengths = self.compute_nearest_neighbours(samples, 400)
-        print(neighbours_lengths)
-
-
-        shortest_path = self.compute_shortest_path(neighbours_lengths, samples[0], samples[1])
+        neighbours_lengths = self.compute_nearest_neighbours(samples, 600)
 
         self.draw_free_graph(neighbours_lengths, samples)
+
+        shortest_path = self.compute_shortest_path2(neighbours_lengths, samples)
+
         self.draw_path(shortest_path, samples)
 
 
@@ -127,8 +127,9 @@ class SPRM:
         def compare(center_sample, sample, radius):
             length = self.compute_length_of_two_points(center_sample[1], sample[1])
             if length <= radius ** 2:
-                if self.validate_edge(center_sample[1], sample[1], 10):
+                if self.validate_edge(center_sample[1], sample[1]):
                     print("valid edge found")
+                    # self.configspace.draw_line(center_sample[1], sample[1], "black")
                     neighbour_lengths.append([center_sample[0], sample[0], length])
 
         for center_sample, sample in itertools.combinations(samples, 2):
@@ -136,27 +137,25 @@ class SPRM:
 
         return neighbour_lengths
 
-    def compute2(self, center_sample, sample, radius):
-        length = self.compute_length_of_two_points(center_sample[1], sample[1])
-        if length <= radius ** 2:
-            if self.validate_edge(center_sample[1], sample[1], 10):
-                print("valid edge found")
-                # return ([center_sample[0], sample[0], length])
-                self.neighbour_lengths.append([center_sample[0], sample[0], length])
+    def validate_edge(self, segment_start, segment_end):
+        # Quick and dirty
 
-    def validate_edge(self, segment_start, segment_end, n):
         t = 0
         range_t = 1
         while t <= range_t+0.1:
             cx = segment_start[0] + t * (segment_end[0] - segment_start[0])
             cy = segment_start[1] + t * (segment_end[1] - segment_start[1])
-            if self.workspace.isInCollissionArea(round(cx), round(cy), 10):
+            if self.workspace.isRobotInCollision(round(cx), round(cy)):
+                # self.configspace.drawConfiguration(round(cx), round(cy), "black")
                 return False
             elif t > 0.9:
                 # self.configspace.draw_line(segment_start, segment_end, "black")
                 return True
             else:
+                # self.configspace.drawConfiguration(round(cx), round(cy), "green")
                 t +=0.1
+
+
 
 
             # print("CX: ", segment_start[0], " + ", segment_end[0], " - ", segment_start[0], " / ", n, " = ", cx)
@@ -187,22 +186,38 @@ class SPRM:
         for s in neighbours:
             sample1 = samples[int(s[0])]
             sample2 = samples[int(s[1])]
-            self.configspace.draw_line(sample1[1], sample2[1], "black")
+            self.configspace.draw_line(sample1[1], sample2[1], "blue")
             self.configspace.draw_text(sample1[1], sample1[0])
             self.configspace.draw_text(sample2[1], sample2[0])
 
             # for sample2 in neighbours:
             #  self.validate_edge(sample1, sample2, 10)
 
-    def compute_shortest_path(self, neighbours_lengths, start, end):
+    def compute_shortest_path(self, neighbours_lengths, samples):
+
         graph = Graph()
         for n in neighbours_lengths:
             graph.add_edge(n[0], n[1], n[2])
 
-        start1 = start[0]
-        end1 = end[0]
+        start = samples[0][0]
+        end = samples [1][0]
 
-        dijkstra = DijkstraSPF(graph, start1)
-        print(" -> ".join(dijkstra.get_path(end1)))
+        dijkstra = DijkstraSPF(graph, start)
 
-        return dijkstra.get_path(end1)
+        print("%-5s %-5s" % ("label", "distance"))
+        for u in neighbours_lengths:
+            print("%-5s %8d" % (u[0], dijkstra.get_distance(u[0])))
+
+        print(" -> ".join(dijkstra.get_path(end)))
+
+        return dijkstra.get_path(end)
+
+    def compute_shortest_path2(self, neighbours_lengths, samples):
+        G = nx.Graph()
+        for n in neighbours_lengths:
+            G.add_edge(n[0], n[1], weight=n[2])
+
+        return nx.shortest_path(G, samples[0][0], samples[1][0], weight='weight')
+
+
+

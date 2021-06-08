@@ -35,44 +35,49 @@ class Workspace:
         self.label.pack(side="bottom", fill="both", expand="yes")
 
     def isRobotInCollision(self, x, y):
-        difference = int(self.robotImage.size[0]/2)
+        difference = int(self.robotImage.size[0]/2) -10
         # width of robot
         x_edges = x - difference, x + difference
         # heigh of robot
         y_edges = y - difference, y + difference
 
-        # deltet that
-        if y_edges[1] > 980:
-            y_edges = y_edges[0], 979
-        elif x_edges[1] > 1350:
-            x_edges = x_edges[0], 1349
+        # Because we add to x and y out of bounce is possible
+        def out_of_bounce(x, y):
+            return y >= len(self.envArray) or x >= len(self.envArray[0])
 
         for i in range(x_edges[0], x_edges[1]):
             for j in range(y_edges[0], y_edges[1]):
-                if not self.envArray[j-1, i-1]:
-                    return True
-        return False
+                if i < len(self.envArray) or j < len(self.envArray[0]):
+                    if not out_of_bounce(i, j):
+                        if not self.envArray[j, i]:
+                            return True
+                    else:
+                        return False
 
     def isInCollision(self, x, y):
         return self.envArray[y, x]
 
-    def isInCollissionArea(self, x, y, pixels):
-        difference = int(pixels / 2)
+    def isInCollissionArea(self, x, y):
+        x += 24
+        y += 35
+
+        difference = int(self.robotImage.size[0] / 2) - 10
         # width of robot
         x_edges = x - difference, x + difference
         # heigh of robot
         y_edges = y - difference, y + difference
 
-        # deltet that
-        if y_edges[1] > 980:
-            y_edges = y_edges[0], 979
-        elif x_edges[1] > 1350:
-            x_edges = x_edges[0], 1349
+        # Because we add to x and y out of bounce is possible
+        def out_of_bounce(x, y):
+            return y >= len(self.envArray) or x >= len(self.envArray[0])
 
         for i in range(x_edges[0], x_edges[1]):
             for j in range(y_edges[0], y_edges[1]):
-                if not self.envArray[j - 1, i - 1]:
-                    return True
-        return False
+                if i < len(self.envArray) or j < len(self.envArray[0]):
+                    if not out_of_bounce(i, j):
+                        if not self.envArray[j, i]:
+                            return True
+                    else:
+                        return False
 
 
