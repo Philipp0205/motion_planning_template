@@ -5,6 +5,7 @@ from configspace import Configspace
 from sprm import SPRM
 from controller import  Controller
 from utils import setBackgroundColor
+from gaussiansampling import GaussianSampling
 
 def demo():
     root = tkinter.Tk()
@@ -24,6 +25,8 @@ def demo():
     controller = Controller(workspace,configspace)
 
     workspace.drawAll(workspace.currentPos[0],workspace.currentPos[1])
+
+    GaussianSampling(configspace,workspace)
 
     def callback(event):
         controller.drawMouseOffSet(event.x, event.y)
