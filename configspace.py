@@ -48,7 +48,7 @@ class Configspace:
       for i in range(1,len(self.solutionPath)):
         c1 = self.solutionPath[i-1]
         c2 = self.solutionPath[i]
-        #self.canvas.create_line(self.off(c1[0]),self.off(c1[1]),self.off(c2[0]),self.off(c2[1]),fill='purple1')
+        self.canvas.create_line(self.off(c1[0]),self.off(c1[1]),self.off(c2[0]),self.off(c2[1]),fill='purple1')
 
 
     def setIntialSolutionPath(self):
