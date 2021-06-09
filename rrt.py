@@ -1,7 +1,10 @@
 import math
 from workspace import Workspace
 from configspace import Configspace
+import numpy as np
 import time
+import random
+from collections import defaultdict
 
 
 class RRT:
@@ -13,100 +16,101 @@ class RRT:
         self.goal_pt = []
         self.vertex = []
         self.add_start_goal_configurations()
-        self.range_max = 100
-        #self.c_near = self.init_pt
-        self.rrt_alg(self.init_pt, self.range_max, 5)
+        self.c_new = []
+        self.range_max = 30
+        self.time_max = 10
+        self.c_new = self.init_pt
+        self.rrt_alg(self.c_new, self.goal_pt, self.range_max)
+
 
     #Initial and goal points set
     def add_start_goal_configurations(self):
         self.init_pt = self.configspace.initConfig
         self.goal_pt = self.configspace.goalConfig
-        # Adding inital configuration to tree
         self.vertex.append(self.init_pt)
-        print(self.init_pt, self.goal_pt)
+        # Adding initial configuration to tree
+        self.configspace.drawConfiguration(self.init_pt[0], self.init_pt[1], 'red')
+        self.configspace.drawConfiguration(self.goal_pt[0], self.goal_pt[1], 'red')
 
     #RRT algorithm implementation
-    def rrt_alg(self, c_near, range_max, t_max):
+    def rrt_alg(self, c_new, goal, range_max):
 
-        #All configurations within distance rangemax
-        self.sample_arr = self.get_x_y_co(c_near, range_max)
-        #print(self.sample_arr)
+        while c_new != self.goal_pt:
+            #Generating random state
 
-        #Setting the time element based on current time
-        t_end = time.time() + t_max
+            self.c_rand = (random.randint(0, 1079), random.randint(0, 699))
 
-        #RRT timeout check
-        while time.time() < t_end:
+            #Checking for random configurations with no collisions
 
-            #Check for configurations with no collisions, must include condition to check for valid edges
-            for c_rand in self.sample_arr:
-                if(not self.workspace.isInCollision(c_rand[0], c_rand[1]) )and (not self.validate_edge(c_near, c_rand, 10)):
-                    print("c_near found")
-                    c_near = c_rand
-                    self.vertex.append(c_near)
-                    break
+            if (not self.workspace.isInCollision(self.c_rand[0], self.c_rand[1])):
+                self.configspace.drawConfiguration(self.c_rand[0], self.c_rand[1], 'yellow')
+                c_new = self.compute_nearest_neighbour(self.vertex, self.c_rand)
 
-            #Checking if goal reached before time out
-            if (c_near != self.goal_pt):
-                print("neighbour not goal")
-                print(self.vertex)
-                self.rrt_alg(c_near, self.range_max, t_max-1)
-            else:
-                print("Neighbour is goal")
-            break
-        #vertex contains all valid configurations within timeout along with initial and goal configurations
-        #Must add logic
-        # 1. to draw configurations and lines obtained
-        # 2. to find path from init to goal using vertex
-        # 3. Maybe instead of taking samples along the circumference of range_max, can use gaussian sampling
+            #Generating c_near configurations
 
-        self.vertex.append(self.goal_pt)
-        #print(self.vertex)
-        print("RRT Timeout")
-        #self.color_points(self.vertex, "red")
-        return self.vertex
+                if(self.edge_distance(self.c_rand, c_new) <= range_max):
+                    self.c_near = self.c_rand
+                else:
+                    edge_distance_x = self.c_rand[0] - c_new[0]
+                    edge_distance_y = self.c_rand[1] - c_new[1]
+                    theta = math.atan2(edge_distance_y, edge_distance_x)
+                    self.c_near = (int(c_new[0] + (range_max * math.cos(theta))), int(c_new[1] + (range_max * math.sin(theta))))
 
-    #Computes all points along the circumference of range_max distance of RRT
-    def get_x_y_co(self, c_near, range_max):
-        self.xc = c_near[0]  # x-co of circle (center)
-        self.yc = c_near[1]  # y-co of circle (center)
-        self.r = range_max  # radius of circle
-        self.sample = []
-        for i in range(360):
-            self.y = self.yc + self.r * math.cos(i)
-            self.x = self.xc + self.r * math.cos(i)
-            self.x = int(self.x)
-            self.y = int(self.y)
-            # Create array with all the x-co and y-co of the circle
-            self.sample.append([self.x, self.y])
-        return self.sample
+            #Validating Edges and adding c_new
 
+                if (self.validate_edge(c_new, self.c_near)):
+                    self.configspace.drawConfiguration(self.c_near[0], self.c_near[1], 'green')
+                    self.configspace.draw_line(c_new, self.c_near, 'black')
+                    c_new = self.c_near
+                    self.vertex.append(c_new)
 
-    def validate_edge(self, sampleA, sampleB, n):
-        segment_start = sampleA
-        segment_end = sampleB
-        def create_linear_interpolation(n):
-            cx = segment_start[0] + (segment_end[0] - segment_start[0]) / n
-            cy = segment_start[1] + (segment_end[1] - segment_start[1]) / n
+                    if(self.validate_edge(c_new, self.goal_pt)):
+                        self.configspace.draw_line(c_new, self.goal_pt, 'black')
+                        self.vertex.append(self.goal_pt)
+                        break
+        #Nodes of the Tree
+        print(self.vertex)
 
-            if self.workspace.isInCollision(round(cx), round(cy)):
-                self.configspace.draw_line(segment_start, segment_end, "red")
-                return True
-            elif segment_start[0] == segment_end[0] & segment_start[1] == segment_end[1]:
-                self.configspace.draw_line(segment_start, segment_end, "green")
+    def validate_edge(self, segment_start, segment_end):
+        # Quick and dirty
+
+        t = 0
+        range_t = 1
+        while t <= range_t+0.1:
+            cx = segment_start[0] + t * (segment_end[0] - segment_start[0])
+            cy = segment_start[1] + t * (segment_end[1] - segment_start[1])
+            if self.workspace.isRobotInCollision(round(cx), round(cy)):
+                # self.configspace.drawConfiguration(round(cx), round(cy), "black")
                 return False
+            elif t > 0.9:
+                # self.configspace.draw_line(segment_start, segment_end, "black")
+                return True
+            else:
+                # self.configspace.drawConfiguration(round(cx), round(cy), "green")
+                t +=0.1
 
-    # while (self.distance == range_max) or (self.collision_status):
-    # print("In collision sample")
-    # self.crand = (random.randint(self.rangexmin, self.rangeymin), random.randint(self.rangexmax, self.rangeymax))
-    # self.crand = (random.randint(763, 1079), random.randint(963, 699))
-    # point_a = np.array(self.cnear)
-    # point_b = np.array(self.crand)
-    # self.distance = np.linalg.norm(point_a - point_b)
-    # print(self.distance)
-    # self.collision_status = self.workspace.isInCollision(self.crand[0], self.crand[1])
-    # print(self.collision_status)
-    # print("neighbour with distance d found")
+
+    def color_points(self, point_array, color):
+        for point in point_array:
+            self.configspace.drawConfiguration(point[0], point[1], color)
+
+    def compute_nearest_neighbour(self, vertices, c_rand):
+        min_distance = self.edge_distance(self.init_pt, c_rand)
+        nearest_neighbour = self.init_pt
+        for vertex in vertices:
+            distance = self.edge_distance(vertex, c_rand)
+            if (min_distance > distance):
+                nearest_neighbour = vertex
+        return nearest_neighbour
+
+    def edge_distance(self, point_a, point_b):
+        point_a = np.array(point_a)
+        point_b = np.array(point_b)
+        distance = np.linalg.norm(point_a - point_b)
+        return distance
+
+
+
 
 
 

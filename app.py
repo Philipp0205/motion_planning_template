@@ -28,6 +28,7 @@ def demo():
 
     workspace.drawAll(workspace.currentPos[0],workspace.currentPos[1])
 
+
     
     def callback(event):
         #print ("clicked at", event.x, event.y)
@@ -54,9 +55,13 @@ def demo():
         controller.setCurrentPosAsGoal()
         slider['from_'] = 0
         slider['to_'] = len(configspace.solutionPath)-1
+        # debugging
+        rrt = RRT(configspace, workspace)
 
     setGoalButton = ttk.Button(page1, text = 'Set Goal',command = set_goal)
     setGoalButton.pack(side=tkinter.RIGHT)
+
+
 
     def set_init():
         controller.setCurrentPosAsInit()
@@ -67,8 +72,7 @@ def demo():
     
     root.mainloop()
 
-    # debugging
-    rrt = RRT(configspace, workspace)
+
 
 if __name__ == "__main__":
     demo()
