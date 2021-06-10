@@ -6,3 +6,9 @@ Pillow==8.1.0
 pytz==2020.5
 six==1.15.0
 sqlparse==0.4.1
+
+pip~=21.0.1
+setuptools~=40.8.0
+joblib~=1.0.1
+dijkstra~=0.2.1
+networkx~=2.5.1

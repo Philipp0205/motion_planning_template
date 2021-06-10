@@ -1,15 +1,9 @@
 import itertools
 import math
-
-from networkx import Graph
-
-from workspace import Workspace
-from configspace import Configspace
-import numpy as np
-import time
 import random
+
 import networkx as nx
-from collections import defaultdict
+import numpy as np
 
 
 class RRT:
@@ -29,18 +23,16 @@ class RRT:
 
         self.second_last_point = None
 
-
         samples_with_ids = self.add_ids_to_samples(self.vertex)
         neighbour_lengths = self.compute_nearest_neighbour_for_samples_with_ids(samples_with_ids, 7)
         print(neighbour_lengths)
 
         # "1", "2", 40
         shortest_path = self.compute_shortest_path(neighbour_lengths, samples_with_ids)
-        shortest_path.append(samples_with_ids[len(samples_with_ids)-1][0])
+        shortest_path.append(samples_with_ids[len(samples_with_ids) - 1][0])
 
         self.draw_path(shortest_path, samples_with_ids)
         self.draw_free_graph(neighbour_lengths, samples_with_ids)
-
 
     # Initial and goal points set
     def add_start_goal_configurations(self):
@@ -56,36 +48,36 @@ class RRT:
 
         while c_new != self.goal_pt:
             # Generating random state
-
-            self.c_rand = (random.randint(0, 1079), random.randint(0, 699))
+            mac_os_x_resolution = 1079, 699
+            windows_resolution = 1349, 979
+            self.c_rand = (random.randint(0, windows_resolution[0]), random.randint(0, windows_resolution[1]))
 
             # Checking for random configurations with no collisions
 
-            if (not self.workspace.isInCollision(self.c_rand[0], self.c_rand[1])):
+            if not self.workspace.isInCollision(self.c_rand[0], self.c_rand[1]):
                 self.configspace.drawConfiguration(self.c_rand[0], self.c_rand[1], 'yellow')
                 c_new = self.compute_nearest_neighbour(self.vertex, self.c_rand)
 
                 # Generating c_near configurations
 
-                if (self.edge_distance(self.c_rand, c_new) <= range_max):
-                    self.c_near = self.c_rand
-                else:
-                    edge_distance_x = self.c_rand[0] - c_new[0]
-                    edge_distance_y = self.c_rand[1] - c_new[1]
-                    theta = math.atan2(edge_distance_y, edge_distance_x)
-                    self.c_near = (
-                    int(c_new[0] + (range_max * math.cos(theta))), int(c_new[1] + (range_max * math.sin(theta))))
+                # if (self.edge_distance(self.c_rand, c_new) <= range_max):
+                #     self.c_near = self.c_rand
+                # else:
+                edge_distance_x = self.c_rand[0] - c_new[0]
+                edge_distance_y = self.c_rand[1] - c_new[1]
+                theta = math.atan2(edge_distance_y, edge_distance_x)
+                c_near = int(c_new[0] + (range_max * math.cos(theta))), int(c_new[1] + (range_max * math.sin(theta)))
 
                 # Validating Edges and adding c_new
                 i = 0
 
-                if (self.validate_edge(c_new, self.c_near)):
-                    self.configspace.drawConfiguration(self.c_near[0], self.c_near[1], 'green')
-                    self.configspace.draw_line(c_new, self.c_near, 'black')
-                    c_new = self.c_near
+                if self.validate_edge(c_new, c_near):
+                    self.configspace.drawConfiguration(c_near[0], c_near[1], 'green')
+                    self.configspace.draw_line(c_new, c_near, 'black')
+                    c_new = c_near
                     self.vertex.append(c_new)
 
-                    if (self.validate_edge(c_new, self.goal_pt)):
+                    if self.validate_edge(c_new, self.goal_pt):
                         self.configspace.draw_line(c_new, self.goal_pt, 'black')
                         self.second_last_point = c_new
                         self.vertex.append(self.goal_pt)
@@ -136,7 +128,6 @@ class RRT:
             compare(center_sample, sample, radius)
         return neighbour_lengths
 
-
     def edge_distance(self, point_a, point_b):
         point_a = np.array(point_a)
         point_b = np.array(point_b)
@@ -149,16 +140,13 @@ class RRT:
         for n in neighbours_lengths:
             G.add_edge(n[0], n[1], weight=n[2])
 
-        return nx.shortest_path(G, samples[0][0], samples[len(samples)-2][0], weight='weight')
+        return nx.shortest_path(G, samples[0][0], samples[len(samples) - 2][0], weight='weight')
 
     def compute_shortest_path_in_vertex(self, vertex):
         shortest_path = [self.goal_pt, self.second_last_point]
 
         while True:
             neighbour = self.compute_nearest_neighbour(self.second_last_point, self.range_max)
-
-
-
 
     def add_ids_to_samples(self, samples):
         result = []
@@ -190,5 +178,3 @@ class RRT:
             # self.configspace.draw_line(sample1[1], sample2[1], "blue")
             self.configspace.draw_text(sample1[1], sample1[0])
             self.configspace.draw_text(sample2[1], sample2[0])
-
-

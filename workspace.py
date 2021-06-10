@@ -46,4 +46,4 @@ class Workspace:
         return False
 
     def isInCollision(self, x, y):
-        return self.envArray[y, x]
+        return not self.envArray[y, x]
