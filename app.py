@@ -43,9 +43,11 @@ def demo():
         if controller.isAllInitialized():
             controller.setSolutionPathOnCurrentPos(int(val))
             controller.drawCurrentPos()
-            #print(controller.isInCollision())
-            if controller.isInCollision(): setBackgroundColor(page1,"red")
-            else: setBackgroundColor(page1,"green")
+            print(workspace.currentPos)
+            if controller.isInCollision():
+                setBackgroundColor(page1, "red")
+            else:
+                setBackgroundColor(page1, "green")
 
     slider = Scale(page1, from_=0, to=200, orient=HORIZONTAL, command=moveRobotOnPath)
     slider.config(length=600)
@@ -55,7 +57,6 @@ def demo():
         controller.setCurrentPosAsGoal()
         slider['from_'] = 0
         slider['to_'] = len(configspace.solutionPath)-1
-        # debugging
         rrt = RRT(configspace, workspace)
 
     setGoalButton = ttk.Button(page1, text = 'Set Goal',command = set_goal)
@@ -71,8 +72,6 @@ def demo():
     slider.pack()
     
     root.mainloop()
-
-
 
 if __name__ == "__main__":
     demo()
