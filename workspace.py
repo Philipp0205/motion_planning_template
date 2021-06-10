@@ -54,7 +54,32 @@ class Workspace:
         return False
 
     def isInCollision(self, x, y):
-        return self.envArray[y, x]
+        return not self.envArray[y, x]
+
+    def isRobotInCollision2(self, x, y):
+        difference = int(self.robotImage.size[0]/2)
+        # width of robot
+        x_edges = x - difference, x + difference
+        # heigh of robot
+        y_edges = y - difference, y + difference
+
+        # deltet that
+        if y_edges[1] > 980:
+            y_edges = y_edges[0], 979
+        elif x_edges[1] > 1350:
+            x_edges = x_edges[0], 1349
+
+        for i in range(x_edges[0], x_edges[1]):
+            for j in range(y_edges[0], y_edges[1]):
+                if self.isInCollision2(i-1, j-1):
+                    return True
+        return False
+
+    def isInCollision2(self, x, y):
+        if x > 1349 or y > 979:
+            return True
+        else:
+            return not self.envArray[y, x]
 
     def isInCollissionArea(self, x, y, pixels):
         difference = int(pixels / 2)
