@@ -11,7 +11,7 @@ class Controller:
 
     def setCurrentPosAsGoal(self):
         self.configspace.goalConfig=(self.workspace.currentPos[0],self.workspace.currentPos[1])
-        self.configspace.setIntialSolutionPath()
+        # self.configspace.setIntialSolutionPath()
         self.configspace.isInitialize = True
         self.workspace.isInitialize = True
         self.configspace.drawSpace()

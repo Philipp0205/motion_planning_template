@@ -107,8 +107,6 @@ class Configspace:
                     newX = sample1[0] + deltaX
                     newY = sample1[1] + deltaY
                     self.solutionPath.append((newX, newY))
-        print("Solution Path")
-        print(self.solutionPath)
 
     def setIntialSolutionPath2(self, samples):
         self.sampleSolutionPath = samples
