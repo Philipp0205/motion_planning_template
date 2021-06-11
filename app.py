@@ -1,3 +1,4 @@
+import time
 import tkinter
 from tkinter import ttk, RIGHT, Canvas, BOTH, Scale, HORIZONTAL
 from workspace import Workspace
@@ -63,19 +64,20 @@ def demo():
     setInitButton.pack(side=tkinter.RIGHT)
 
     def start_sPRM():
+        start = time.time()
         sprm = SPRM(configspace, workspace)
+        end = time.time()
+
 
     # Debugging
     setInitButton = ttk.Button(page1, text = 'sPRM',command = start_sPRM)
     setInitButton.pack(side=tkinter.RIGHT)
 
     slider.pack()
-
     root.mainloop()
 
 if __name__ == "__main__":
     demo()
-
 
 def set_slider():
     return None

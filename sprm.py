@@ -29,19 +29,17 @@ class SPRM:
 
         self.add_start_goal_configurations()
 
-        self.compute_samples(1000, 1350, 980)
+        self.compute_samples(500, 1350, 980)
 
         samples = self.add_ids_to_samples(self.vertex_no_colission)
 
-        neighbours_lengths = self.compute_nearest_neighbours(samples, 600)
+        neighbours_lengths = self.compute_nearest_neighbours(samples, 700)
 
         self.draw_free_graph(neighbours_lengths, samples)
 
         shortest_path = self.compute_shortest_path2(neighbours_lengths, samples)
 
         self.draw_path(shortest_path, samples)
-
-
 
     def draw_path(self, path, samples):
         shortest_path_samples = []
@@ -148,7 +146,7 @@ class SPRM:
             if self.workspace.isRobotInCollision(round(cx), round(cy)):
                 # self.configspace.drawConfiguration(round(cx), round(cy), "black")
                 return False
-            elif t > 0.9:
+            elif t > 0.99:
                 # self.configspace.draw_line(segment_start, segment_end, "black")
                 return True
             else:
